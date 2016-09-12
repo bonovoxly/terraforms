@@ -3,7 +3,7 @@ provider "azurerm" {
 }
 
 # Create a resource group
-resource "azurerm_resource_group" "smoketest" {
+resource "azurerm_resource_group" "resource_group" {
   name = "${var.environment}"
   location = "East US"
   tags {
