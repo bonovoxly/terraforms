@@ -1,8 +1,8 @@
-# arm_demo variables
+# vmimage variables
 
 variable "environment" {
   type = "string"
-  default = "arm_demo"
+  default = "vmimage"
 }
 
 variable "base_image" {
