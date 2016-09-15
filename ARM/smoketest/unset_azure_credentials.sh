@@ -1,0 +1,1 @@
+../../unset_azure_credentials.sh
