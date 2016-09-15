@@ -4,11 +4,11 @@ Very simply test to verify working Azure credentials.  This will create a resour
 
 # quick start
 
-- cd to the `arm_smoketest` directory. Source the `azure_credentials.sh`:
+- cd to the `arm_smoketest` directory. Source the `azure_credentials.sh` (symlinked):
 
 ```
 cd terraform/arm_smoketest
-source ../azure_credentials.sh
+source ./azure_credentials.sh
 ```
 
 - Run Terraform:
