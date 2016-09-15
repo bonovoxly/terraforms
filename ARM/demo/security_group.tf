@@ -18,7 +18,7 @@ resource "azurerm_network_security_group" "sg-bastionhost" {
 
     security_rule {
         name = "deny-all"
-        priority = 6001
+        priority = 4000 
         direction = "Inbound"
         access = "Deny"
         protocol = "*"
