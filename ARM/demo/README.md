@@ -4,7 +4,7 @@ This Terraform plan deploys a resource group and a demo Azure Resource Group (AR
 
 # quick start
 
-- cd to the `arm_demo` directory. Source the `azure_credentials.sh` (symlinked):
+- cd to the `terraforms/ARM/demo` directory. Source the `azure_credentials.sh` (symlinked):
 
 ```
 cd terraform/arm_demo
