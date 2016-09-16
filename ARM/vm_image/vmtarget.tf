@@ -17,7 +17,7 @@ resource "azurerm_virtual_machine" "vmtarget" {
 
     storage_os_disk {
         name          = "vmtarget-disk"
-        vhd_uri       = "${azurerm_storage_account.storageaccount.primary_blob_endpoint}${azurerm_storage_container.vmtarget-sc.name}/disk.vhd"
+        vhd_uri       = "${azurerm_storage_account.vmimage-storageaccount.primary_blob_endpoint}${azurerm_storage_container.vmtarget-sc.name}/disk.vhd"
         caching       = "ReadWrite"
         create_option = "FromImage"
     }
@@ -61,7 +61,7 @@ resource "azurerm_network_interface" "vmtarget-nic" {
 resource "azurerm_storage_container" "vmtarget-sc" {
     name = "vmtarget-sc"
     resource_group_name   = "${azurerm_resource_group.resource_group.name}"
-    storage_account_name  = "${azurerm_storage_account.storageaccount.name}"
+    storage_account_name  = "${azurerm_storage_account.vmimage-storageaccount.name}"
     container_access_type = "private"
 }
 
