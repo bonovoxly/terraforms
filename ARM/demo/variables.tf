@@ -2,10 +2,15 @@
 
 variable "environment" {
   type = "string"
-  default = "arm_demo"
+  default = "demo"
 }
 
 variable "base_image" {
   type = "string"
   default = "DEFAULT"
+}
+
+variable "sshkey" {
+  type = "string"
+  default = "~/.ssh/id_rsa.pub"
 }

@@ -1,11 +1,11 @@
 # arm_demo
 
 # Create a virtual machine
-resource "azurerm_virtual_machine" "bastionhost" {
-    name                  = "bastionhost"
+resource "azurerm_virtual_machine" "internalhost" {
+    name                  = "internalhost"
     location              = "East US"
     resource_group_name   = "${azurerm_resource_group.resource_group.name}"
-    network_interface_ids = ["${azurerm_network_interface.bastionhost-nic.id}"]
+    network_interface_ids = ["${azurerm_network_interface.internalhost-nic.id}"]
     vm_size               = "Standard_A0"
 
     storage_image_reference {
@@ -16,14 +16,14 @@ resource "azurerm_virtual_machine" "bastionhost" {
     }
 
     storage_os_disk {
-        name          = "bastionhost-disk"
-        vhd_uri       = "${azurerm_storage_account.storageaccount.primary_blob_endpoint}${azurerm_storage_container.bastionhost-sc.name}/disk.vhd"
+        name          = "internalhost-disk"
+        vhd_uri       = "${azurerm_storage_account.storageaccount.primary_blob_endpoint}${azurerm_storage_container.internalhost-sc.name}/disk.vhd"
         caching       = "ReadWrite"
         create_option = "FromImage"
     }
 
     os_profile {
-        computer_name  = "bastionhost"
+        computer_name  = "internalhost"
         admin_username = "ubuntu"
         # this doesn't matter;  password login is disabled
         admin_password = ""
@@ -40,26 +40,26 @@ resource "azurerm_virtual_machine" "bastionhost" {
 }
 
 # configure network interface
-resource "azurerm_network_interface" "bastionhost-nic" {
-    name                = "bastionhost-nic"
+resource "azurerm_network_interface" "internalhost-nic" {
+    name                = "internalhost-nic"
     location            = "East US"
     resource_group_name = "${azurerm_resource_group.resource_group.name}"
 
     ip_configuration {
-        name                          = "bastionhost-${count.index}"
+        name                          = "internalhost-${count.index}"
         subnet_id                     = "${azurerm_subnet.subnet-0.id}"
-        private_ip_address            = "172.29.0.4"
+        private_ip_address            = "172.29.1.10"
         private_ip_address_allocation = "static"
-        public_ip_address_id          = "${azurerm_public_ip.bastionhost-public-ip.id}"
+        public_ip_address_id          = "${azurerm_public_ip.internalhost-public-ip.id}"
     }
-    network_security_group_id  = "${azurerm_network_security_group.sg-bastionhost.id}"
+    network_security_group_id  = "${azurerm_network_security_group.sg-internalhost.id}"
     #network_security_group_id = "${azurerm_network_security_group.${var.environ}.id}"
 }
 
 
 # configure storage container
-resource "azurerm_storage_container" "bastionhost-sc" {
-    name = "bastionhost-sc"
+resource "azurerm_storage_container" "internalhost-sc" {
+    name = "internalhost-sc"
     resource_group_name   = "${azurerm_resource_group.resource_group.name}"
     storage_account_name  = "${azurerm_storage_account.storageaccount.name}"
     container_access_type = "private"
@@ -67,8 +67,8 @@ resource "azurerm_storage_container" "bastionhost-sc" {
 
 
 # set public IP
-resource "azurerm_public_ip" "bastionhost-public-ip" {
-    name                          = "bastionhost-public-ip"
+resource "azurerm_public_ip" "internalhost-public-ip" {
+    name                          = "internalhost-public-ip"
     location                      = "East US"
     resource_group_name           = "${azurerm_resource_group.resource_group.name}"
     public_ip_address_allocation  = "dynamic"

@@ -18,7 +18,7 @@ resource "azurerm_network_security_group" "sg-bastionhost" {
 
     security_rule {
         name = "deny-all"
-        priority = 4000 
+        priority = 4000
         direction = "Inbound"
         access = "Deny"
         protocol = "*"
@@ -31,8 +31,8 @@ resource "azurerm_network_security_group" "sg-bastionhost" {
 }
 
 # set security group
-resource "azurerm_network_security_group" "sg-internal" {
-    name = "sg-internal"
+resource "azurerm_network_security_group" "sg-internalhost" {
+    name = "sg-internalhost"
     location = "East US"
     resource_group_name   = "${azurerm_resource_group.resource_group.name}"
 
@@ -50,7 +50,7 @@ resource "azurerm_network_security_group" "sg-internal" {
 
     security_rule {
         name = "deny-all"
-        priority = 10001
+        priority = 4000
         direction = "Inbound"
         access = "Deny"
         protocol = "*"
