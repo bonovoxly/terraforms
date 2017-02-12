@@ -1,4 +1,4 @@
-# arm_demo
+# vm_image
 
 This Terraform plan deploys a resource group to Azure Resource Manager (ARM), with a single VM.  It's purpose is to create a base VM template to use.
 
@@ -11,9 +11,9 @@ cd terraform/arm_demo
 source ./azure_credentials.sh
 ```
 
-- Run Terraform:
+- Run Terraform.  Note that the SSH key variable should be set:
 
 ```
-terraform plan
-terraform apply
+TF_VAR_sshkey=/path/to/ssh_public_key terraform plan
+TF_VAR_sshkey=/path/to/ssh_public_key terraform apply
 ```

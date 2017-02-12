@@ -33,7 +33,7 @@ resource "azurerm_virtual_machine" "vmtarget" {
         disable_password_authentication = true
         ssh_keys {
           path     = "/home/ubuntu/.ssh/authorized_keys"
-          key_data = "${file("~/.ssh/b_dev_demo.pub")}"
+          key_data = "${file("${var.sshkey}")}"
         }
     }
 
