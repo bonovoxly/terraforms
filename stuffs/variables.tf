@@ -9,7 +9,7 @@ variable "old_ami" {
 # variable to identify environment
 variable "env" {
   type = "string"
-  default = "stuffs-demo"
+  default = "corp"
 }
 
 # VPC/subnet first two octet CIDR to use
