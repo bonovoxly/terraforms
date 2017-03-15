@@ -1,6 +1,6 @@
 # stuffs
 
-Stuffs, the AWS instance inventory management documentation generator, using Terraform, Ansible, AWS S3, and Hugo.
+Stuffs, a proof-of-concept AWS instance inventory management documentation generator, using Terraform, Ansible, AWS S3, and Hugo.
 
 # quick start
 
@@ -25,3 +25,7 @@ cd another_kubernetes
 terraform plan
 terraform apply
 ```
+
+# issues and notes
+
+- You will definitely want to change the bucket name and ACL;  no one will want to have a truly public bucket.  Better to configure some NGINX front end.  This was a proof of concept configuration.
