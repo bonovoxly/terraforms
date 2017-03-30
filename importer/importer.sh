@@ -13,6 +13,19 @@ ROUTE53_EC2_TF='ec2.tf'
 ROUTE53_RECORDS_TF='route53_records.tf'
 ROUTE53_ZONES_TF='route53_zones.tf'
 
+# Gather AWS information. we do this here so functions can access them.
+# Internet gateway
+echo "Describing AWS Internet gateways..."
+INTERNET_GATEWAY=$(aws ec2 describe-internet-gateways)
+# EIP addresses
+echo "Describing AWS EIPs..."
+EIP_ADDRESSES=$(aws ec2 describe-addresses | jq .)
+# get AWS Route53 Zones
+AWS_ZONES=$(aws route53 list-hosted-zones | jq '.[]')
+# NAT instances
+NAT_INSTANCES=$(aws ec2 describe-nat-gateways | jq .)
+
+
 # sets the working directory
 function set_working_dir() {
   if [[ $1 != "" ]]; then
@@ -34,17 +47,6 @@ function check_terraform() {
   fi
 }
 
-function gather_route53_information() {
-  # EIP addresses
-  EIP_ADDRESSES=$(aws ec2 describe-addresses | jq .)
-  # Internet gateway
-  INTERNET_GATEWAY=$(aws ec2 describe-internet-gateways)
-  # NAT instances
-  NAT_INSTANCES=$(aws ec2 describe-nat-gateways | jq .)
-  #EC2_INSTANCES=
-  #ROUTE53_ZONES=$(aws route53 list-hosetd-zones --query "HostedZones[*].[Name, Id, Config.PrivateZone]" | jq -c '.[]')
-}
-
 # initialize terraform files
 function initialize_tf_files() {
   echo "Wiping TF files..."
@@ -57,9 +59,6 @@ function initialize_tf_files() {
 }
 
 function aws_internet_gateway() {
-  # Internet gateway
-  echo "Describing AWS Internet gateways..."
-  INTERNET_GATEWAY=$(aws ec2 describe-internet-gateways)
   # create arrays for the internet gateway ID and VPC ID (parallel lists)
   IG_ID=($(echo ${INTERNET_GATEWAY} | jq '.InternetGateways[].InternetGatewayId' | awk -F'"' '{ print $2 }'))
   VPC_ID=($(echo ${INTERNET_GATEWAY} | jq '.InternetGateways[].Attachments[0].VpcId' | awk -F'"' '{ print $2 }'))
@@ -93,8 +92,6 @@ EOF
 }
 
 function aws_eip() {
-  # EIP addresses
-  EIP_ADDRESSES=$(aws ec2 describe-addresses | jq .)
   EIP_ID=$(echo ${EIP_ADDRESSES} | jq '.Addresses[].AllocationId' | awk -F'"' '{ print $2 }')
   for each in $EIP_ID; do
     echo "$each"
@@ -109,8 +106,6 @@ EOF
 }
 
 function aws_route53() {
-  # get AWS Route53 Zones
-  AWS_ZONES=$(aws route53 list-hosted-zones | jq '.[]')
   # get the DNS zone with a trailing '.'.
   ZONE_NAME=($(echo $AWS_ZONES | jq '.[].Name' | awk -F'"' '{ print $2 }'))
   # get the DNS zone.
@@ -191,28 +186,51 @@ EOF
 }
 
 function aws_nat_gateway() {
-  # NAT instances
-  NAT_INSTANCES=($(aws ec2 describe-nat-gateways | jq .))
   # Get array of values for NAT gateways.
-  NAT_EIP_ALLOCATION_ID=($(echo ${NAT_INSTANCES} | jq '.NatGateways[].NatGatewayAddresses[0].AllocationId'))
-  NAT_ID=($(echo ${NAT_INSTANCES} | jq '.NatGateways[].NatGatewayId'))
-  NAT_SUBNET_ID=($(echo ${NAT_INSTANCES} | jq '.NatGateways[].SubnetId'))
-  NAT_VPC_ID=($(echo ${NAT_INSTANCES} | jq '.NatGateways[].VpcId'))
+  NAT_EIP_ALLOCATION_ID=($(echo ${NAT_INSTANCES} | jq '.NatGateways[].NatGatewayAddresses[0].AllocationId' | awk -F'"' '{ print $2 }'))
+  NAT_ID=($(echo ${NAT_INSTANCES} | jq '.NatGateways[].NatGatewayId' | awk -F'"' '{ print $2 }'))
+  NAT_SUBNET_ID=($(echo ${NAT_INSTANCES} | jq '.NatGateways[].SubnetId' | awk -F'"' '{ print $2 }'))
+  NAT_VPC_ID=($(echo ${NAT_INSTANCES} | jq '.NatGateways[].VpcId' | awk -F'"' '{ print $2 }'))
 
   for index in ${!NAT_ID[*]}; do
-    echo "Creating NAT instances configration and importing to Terraform: ${NAT_ID[$index]}"
+    echo "NAT ID: ${NAT_ID[$index]}"
+    N_VPC_ID=$(echo ${NAT_INSTANCES} | jq --arg n "${NAT_ID[$index]}" '.NatGateways | map( select( .NatGatewayId == $n )) | .[].VpcId' | awk -F'"' '{ print $2 }')
+    IGW_ID=$(echo ${INTERNET_GATEWAY} | jq --arg nid "${N_VPC_ID}" '.InternetGateways | map( select( .Attachments[0].VpcId == $nid )) | .[].InternetGatewayId' | awk -F'"' '{ print $2 }')
+    echo "NAT instance VPC ID: $N_VPC_ID"
+    echo "Internet Gateway ID: $IGW_ID"
+    echo "Creating NAT instances configuration and importing to Terraform: ${NAT_ID[$index]}"
     cat <<EOF >> $NAT_INSTANCES_TF
 resource "aws_nat_gateway" "${NAT_ID[$index]}" {
   depends_on = [
     "aws_eip.${NAT_EIP_ALLOCATION_ID[$index]}",
-    "aws_internet_gateway.${NAT_ID[$index]}"
+    "aws_internet_gateway.${IGW_ID}"
   ]
   allocation_id = "${NAT_EIP_ALLOCATION_ID[$index]}"
   subnet_id = "${NAT_SUBNET_ID[$index]}"
 }
 EOF
+  terraform_import aws_nat_gateway.${NAT_ID[$index]} ${NAT_ID[$index]}
   done
 }
+
+# function aws_vpc() {
+#   # VPCs
+#   VPCS=$(aws ec2 describe-vpcs | jq .)
+#   VPC_ID=($(echo ${VPCS} | jq '.Vpcs[].VpcId'))
+#   for indexvpc in ${!VPC_ID[*]}; do
+#     echo "Creating VPC configuration and importing to Terraform: ${VPC_ID[$indexvpc]}"
+#     cat <<EOF >> $VPC_TF
+# resource "aws_vpc" "${VPC_ID[$indexvpc]}" {
+#   cidr_block = "${ var.cidr}.0.0/16"
+#   instance_tenancy = "${ var.tenancy }"
+#   enable_dns_hostnames = "True"
+#   tags {
+#     Name = "${var.env }-vpc"
+#     Environment = "${ var.env }"
+#   }
+# }
+# EOF
+# }
 
 function terraform_import() {
   echo "Terraform state: ${1}"
@@ -242,4 +260,4 @@ initialize_tf_files
 aws_route53
 aws_internet_gateway
 aws_eip
-aws_nat_gateway - need to work on
+aws_nat_gateway
