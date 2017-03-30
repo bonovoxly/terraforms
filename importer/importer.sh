@@ -24,7 +24,8 @@ EIP_ADDRESSES=$(aws ec2 describe-addresses | jq .)
 AWS_ZONES=$(aws route53 list-hosted-zones | jq '.[]')
 # NAT instances
 NAT_INSTANCES=$(aws ec2 describe-nat-gateways | jq .)
-
+# VPCs
+VPCS=$(aws ec2 describe-vpcs | jq .)
 
 # sets the working directory
 function set_working_dir() {
@@ -213,24 +214,25 @@ EOF
   done
 }
 
-# function aws_vpc() {
-#   # VPCs
-#   VPCS=$(aws ec2 describe-vpcs | jq .)
-#   VPC_ID=($(echo ${VPCS} | jq '.Vpcs[].VpcId'))
-#   for indexvpc in ${!VPC_ID[*]}; do
-#     echo "Creating VPC configuration and importing to Terraform: ${VPC_ID[$indexvpc]}"
-#     cat <<EOF >> $VPC_TF
-# resource "aws_vpc" "${VPC_ID[$indexvpc]}" {
-#   cidr_block = "${ var.cidr}.0.0/16"
-#   instance_tenancy = "${ var.tenancy }"
-#   enable_dns_hostnames = "True"
-#   tags {
-#     Name = "${var.env }-vpc"
-#     Environment = "${ var.env }"
-#   }
-# }
-# EOF
-# }
+function aws_vpc() {
+  # VPCs
+  VPC_ID=($(echo ${VPCS} | jq '.Vpcs[].VpcId'))
+  VPC_CIDR=($(echo ${VPC} | jq '.Vpcs[].CdirBlock'))
+  VPC_TENANCY=($(echo ${VPC} | jq '.Vpcs[].InstanceTenancy'))
+  for indexvpc in ${!VPC_ID[*]}; do
+    echo "Creating VPC configuration and importing to Terraform: ${VPC_ID[$indexvpc]}"
+    cat <<EOF >> $VPC_TF
+resource "aws_vpc" "${VPC_ID[$indexvpc]}" {
+  cidr_block = "${VPC_CIDR[$indexvpc]"
+  instance_tenancy = "${VPC_TENANCY[$indexvpc]"
+  enable_dns_hostnames = "True"
+  tags {
+    Name = "${var.env }-vpc"
+    Environment = "${ var.env }"
+  }
+}
+EOF
+}
 
 function terraform_import() {
   echo "Terraform state: ${1}"
@@ -257,6 +259,7 @@ function terraform_import() {
 # run
 set_working_dir "$1"
 initialize_tf_files
+aws_vpc
 aws_route53
 aws_internet_gateway
 aws_eip
