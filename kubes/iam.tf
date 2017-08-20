@@ -28,12 +28,6 @@ resource "aws_iam_instance_profile" "node" {
   roles = ["${ aws_iam_role.node.name }"]
 }
 
-# dmznode instance profile
-resource "aws_iam_instance_profile" "dmznode" {
-  name = "${ var.env }-dmznode-profile"
-  roles = ["${ aws_iam_role.dmznode.name }"]
-}
-
 # openvpn IAM role
 resource "aws_iam_role" "openvpn" {
   name = "${ var.env }-openvpn-role"
@@ -117,26 +111,6 @@ EOF
 # node IAM role
 resource "aws_iam_role" "node" {
   name = "${ var.env }-node-role"
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": "sts:AssumeRole",
-      "Principal": {
-        "Service": "ec2.amazonaws.com"
-      },
-      "Effect": "Allow",
-      "Sid": ""
-    }
-  ]
-}
-EOF
-}
-
-# dmznode IAM role
-resource "aws_iam_role" "dmznode" {
-  name = "${ var.env }-dmznode-role"
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -242,55 +216,3 @@ resource "aws_iam_role_policy" "node" {
 EOF
 }
 
-# node IAM role policy
-resource "aws_iam_role_policy" "dmznode" {
-  name = "dmznode_policy"
-  role = "${ aws_iam_role.dmznode.id }"
-  policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": "s3:*",
-      "Resource": [
-        "arn:aws:s3:::kubernetes-*"
-      ]
-    },
-    {
-      "Effect": "Allow",
-      "Action": "ec2:Describe*",
-      "Resource": "*"
-    },
-    {
-      "Effect": "Allow",
-      "Action": "ec2:AttachVolume",
-      "Resource": "*"
-    },
-    {
-      "Effect": "Allow",
-      "Action": "ec2:DetachVolume",
-      "Resource": "*"
-    },
-    {
-      "Effect": "Allow",
-      "Action": ["route53:*"],
-      "Resource": ["*"]
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "ecr:GetAuthorizationToken",
-        "ecr:BatchCheckLayerAvailability",
-        "ecr:GetDownloadUrlForLayer",
-        "ecr:GetRepositoryPolicy",
-        "ecr:DescribeRepositories",
-        "ecr:ListImages",
-        "ecr:BatchGetImage"
-      ],
-      "Resource": "*"
-    }
-  ]
-}
-EOF
-}
