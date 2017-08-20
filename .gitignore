@@ -63,8 +63,9 @@ working/*
 .travis.yml
 *.retry
 
-# Terraform state files #
-#########################
+# Terraform files #
+###################
+*/.terraform/*
 terraform.tfstate
 terraform.tfstate.backup
 
