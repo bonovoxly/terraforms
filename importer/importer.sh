@@ -414,8 +414,8 @@ function aws_ec2() {
     echo "Adding instance ID: ${EC2_INSTANCES[$indexec2]}"
     cat <<EOF >> $EC2_TF
     ami = "${INSTANCE_AMI[$indexec2]}"
-    associate_public_ip_address = true
-    iam_instance_profile = "${ var.env }-openvpn-profile"
+    #associate_public_ip_address = if the instance
+    iam_instance_profile = "${IAM_PROFILE[$indexec2]}"
     instance_type = "t2.micro"
     lifecycle {
       ignore_changes = ["ami"]
