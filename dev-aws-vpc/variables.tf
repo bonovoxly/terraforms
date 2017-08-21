@@ -6,12 +6,6 @@ variable "dns" {
   default = "dev.example.internal"
 }
 
-# pre-assigned ElasticIP needs to be created first.
-variable "eip" {
-  type    = "string"
-  default = "INSERTHERE"
-}
-
 # variable to identify environment
 variable "env" {
   type    = "string"
