@@ -36,6 +36,7 @@ resource "aws_instance" "openvpn" {
     KubernetesCluster = "${ var.kubernetes_cluster_id }"
     Role              = "vpn"
     sshUser           = "ubuntu"
+    prometheus_node   = "9100"
   }
 }
 
