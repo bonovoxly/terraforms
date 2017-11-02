@@ -1,9 +1,9 @@
 resource "aws_route53_record" "kube-controlplane" {
    zone_id = "${ data.aws_route53_zone.zone.id }"
-   name    = "${ var.env }-controller.${ var.dns }"
-   type    = "A"
-   ttl     = "300"
-   records = ["${ aws_instance.controller-a.private_ip }","${ aws_instance.controller-b.private_ip }","${ aws_instance.controller-c.private_ip }"]
+   name = "${ var.env }-controller.${ var.dns }"
+   type = "CNAME"
+   ttl = "60"
+   records = ["${ aws_elb.dev-controller.dns_name }"]
 }
 
 resource "aws_route53_record" "cfssl" {

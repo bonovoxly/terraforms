@@ -5,6 +5,7 @@ Deployment of the Kubernetes infrastructure. Meant to be used with the AWS VPC d
 - cfssl instance.
 - etcd cluster.
 - kubernetes controller cluster.
+- an internal ELB for controller API access.
 - kubernetes workers.
 - EFS storage (NFS backend if needed).
 
