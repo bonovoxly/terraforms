@@ -42,6 +42,22 @@ data "aws_subnet" "opsprivate-a" {
   }
 }
 
+# opsprivate-b subnet lookup
+data "aws_subnet" "opsprivate-b" {
+  filter {
+    name   = "tag:Name"
+    values = ["${ var.env }-opsprivate-subnet-b"]
+  }
+}
+
+# opsprivate-c subnet lookup
+data "aws_subnet" "opsprivate-c" {
+  filter {
+    name   = "tag:Name"
+    values = ["${ var.env }-opsprivate-subnet-c"]
+  }
+}
+
 # elbpublic-a subnet lookup
 data "aws_subnet" "elbpublic-a" {
   filter {
