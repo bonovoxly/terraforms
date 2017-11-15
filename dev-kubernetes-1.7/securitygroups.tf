@@ -216,3 +216,26 @@ resource "aws_security_group" "efs" {
 }
 
 
+# controller ELB security group
+resource "aws_security_group" "controller-elb-inbound" {
+  description = "${ var.env } controller public ELB"
+  # outgoing rules
+  egress = {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = [ "0.0.0.0/0" ]
+  }
+  ingress = {
+    from_port = 6443
+    to_port = 6443
+    protocol = "tcp"
+    cidr_blocks = [ "0.0.0.0/0" ]
+  }
+  name = "${ var.env }-controller-elb-inbound"
+  tags {
+    Name = "${ var.env }-controller-elb-inbound"
+    terraform_id = "${ var.env }-terraform"
+  }
+  vpc_id = "${  data.aws_vpc.vpc.id }"
+}
