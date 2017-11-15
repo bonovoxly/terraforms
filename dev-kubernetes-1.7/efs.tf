@@ -10,7 +10,19 @@ resource "aws_efs_file_system" "kubernetes" {
 }
 
 resource "aws_efs_mount_target" "kubernetes" {
-  file_system_id  = "${ aws_efs_file_system.kubernetes.id }"
-  subnet_id       = "${data.aws_subnet.opsprivate-a.id }"
+  file_system_id = "${ aws_efs_file_system.kubernetes.id }"
+  subnet_id = "${data.aws_subnet.opsprivate-a.id }"
+  security_groups = ["${aws_security_group.efs.id}"]
+}
+
+resource "aws_efs_mount_target" "kubernetes-b" {
+  file_system_id = "${ aws_efs_file_system.kubernetes.id }"
+  subnet_id = "${data.aws_subnet.opsprivate-b.id }"
+  security_groups = ["${aws_security_group.efs.id}"]
+}
+
+resource "aws_efs_mount_target" "kubernetes-c" {
+  file_system_id = "${ aws_efs_file_system.kubernetes.id }"
+  subnet_id = "${data.aws_subnet.opsprivate-c.id }"
   security_groups = ["${aws_security_group.efs.id}"]
 }
