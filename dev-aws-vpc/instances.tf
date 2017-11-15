@@ -16,7 +16,7 @@ data "aws_ami" "ubuntu" {
 resource "aws_instance" "openvpn" {
   ami                  = "${ data.aws_ami.ubuntu.id }"
   iam_instance_profile = "${ var.env }-openvpn-profile"
-  instance_type        = "t2.small"
+  instance_type        = "t2.micro"
   lifecycle {
     ignore_changes = ["ami"]
   }
