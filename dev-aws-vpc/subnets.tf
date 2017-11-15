@@ -61,15 +61,43 @@ resource "aws_subnet" "elbpublic-c" {
   }
 }
 
-# operations private subnet (CFSSL and other internal instances)
+# operations private subnet a (CFSSL and other internal instances)
 resource "aws_subnet" "opsprivate-a" {
   vpc_id            ="${ aws_vpc.main.id }"
-  cidr_block        = "${ var.cidr }.10.0/24"
+  cidr_block        = "${ var.cidr }.4.0/24"
   availability_zone = "${ var.region }a"
 
   tags {
     terraform_id = "${ var.env }-terraform"
     Name         = "${ var.env }-opsprivate-subnet-a"
+    Environment  = "${ var.env }"
+    Private = "yes"
+  }
+}
+
+# operations private subnet b
+resource "aws_subnet" "opsprivate-b" {
+  vpc_id            ="${ aws_vpc.main.id }"
+  cidr_block        = "${ var.cidr }.5.0/24"
+  availability_zone = "${ var.region }b"
+
+  tags {
+    terraform_id = "${ var.env }-terraform"
+    Name         = "${ var.env }-opsprivate-subnet-b"
+    Environment  = "${ var.env }"
+    Private = "yes"
+  }
+}
+
+# operations private subnet c
+resource "aws_subnet" "opsprivate-c" {
+  vpc_id            ="${ aws_vpc.main.id }"
+  cidr_block        = "${ var.cidr }.6.0/24"
+  availability_zone = "${ var.region }c"
+
+  tags {
+    terraform_id = "${ var.env }-terraform"
+    Name         = "${ var.env }-opsprivate-subnet-c"
     Environment  = "${ var.env }"
     Private = "yes"
   }
