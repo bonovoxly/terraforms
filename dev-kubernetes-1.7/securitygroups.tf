@@ -113,7 +113,7 @@ resource "aws_security_group" "controller" {
     from_port = 6443
     to_port = 6443
     protocol = "tcp"
-    cidr_blocks = [ "${ data.aws_subnet.node-a.cidr_block }","${ data.aws_subnet.node-b.cidr_block }","${ data.aws_subnet.node-c.cidr_block }"  ]
+    cidr_blocks = [ "${ data.aws_subnet.elbpublic-a.cidr_block }","${ data.aws_subnet.elbpublic-b.cidr_block }","${ data.aws_subnet.elbpublic-c.cidr_block }","${ data.aws_subnet.node-a.cidr_block }","${ data.aws_subnet.node-b.cidr_block }","${ data.aws_subnet.node-c.cidr_block }"  ]
   }
   # nodes - Prometheus
   ingress = {
